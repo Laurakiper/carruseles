@@ -503,25 +503,30 @@
     txt.textContent = 'Generando...';
     out.innerHTML = `<div class="loading-state"><div class="spinner"></div><p class="loading-text">Escribiendo el carrusel con IA...</p></div>`;
 
-    const prompt = `Eres copywriter experto en publicidad digital para redes sociales en Colombia.
+    const prompt = `Eres copywriter senior especializado en publicidad digital para marcas de estilo de vida y familia en Colombia.
 
-PRODUCTO: Kiper — reloj inteligente para niños. Es la alternativa al smartphone para niños de 6 a 12 años que necesitan estar conectados con sus papás.
-FUNCIONES: llamadas a hasta 15 contactos aprobados (sin números externos), mensajes de voz, GPS en tiempo real, cámara con foto remota (el papá manda solicitud y el niño responde con foto desde el reloj), música, videos, grabadora, calculadora, alarmas, 2 juegos educativos (matemáticas e inglés), control parental desde WhatsApp. NO tiene: redes sociales, apps, navegador, nada que distraiga.
-ÁNGULO DE VENTA: Ángulo ${selAngle.n} — "${selAngle.t}"
-AUDIENCIA: Padres con hijos 6-12 años, clase media y media-alta, Colombia. Padres modernos, con empleo, que usan WhatsApp y redes sociales.
+VOZ DE MARCA — KIPER:
+Kiper no le habla al papá con miedo. Le habla al papá con criterio.
+Al que sabe lo que está construyendo. Al que quiere estar presente sin perderse una sola etapa.
+Al que entiende que el vínculo con su hijo no se cuida solo — y que hay una diferencia enorme entre un hijo monitoreado y un hijo que te busca a ti primero cuando algo pasa.
+Al que se niega a creer que la única forma de estar conectado con su hijo es darle un smartphone.
+El tono es: cálido, seguro, inteligente. Nunca alarmista. Nunca culposo. Nunca corporativo.
+Es un papá que elige con conciencia, no que reacciona con miedo.
 
-Genera exactamente ${slideCount + 2} slides: 1 hook + ${slideCount} slides de contenido + 1 CTA final.
+PRODUCTO: Kiper — reloj inteligente para niños 6-12 años. La alternativa al smartphone para el papá que quiere conexión real, no vigilancia.
+FUNCIONES CLAVE: llamadas solo a contactos aprobados, mensajes de voz, GPS en tiempo real, foto remota desde el reloj, juegos educativos, control parental por WhatsApp. Sin redes sociales, sin apps, sin navegador.
+ÁNGULO: Ángulo ${selAngle.n} — "${selAngle.t}"
 
-REGLAS:
-- El hook: máx 8 palabras. Golpe directo. Puede ser pregunta, afirmación provocadora o verdad incómoda.
-- Título de cada slide: máx 6 palabras.
-- Mensaje de cada slide: máx 2 frases cortas. Máx 20 palabras en total.
-- CTA: máx 10 palabras + botón de máx 3 palabras.
-- Nada de párrafos. Cada slide es un impacto, no una explicación.
-- Los slides de contenido deben conectar profundo con el ángulo y mostrar el beneficio de Kiper.
-- El CTA debe ser claro, urgente y humano. Nada genérico.
-- Las descripciones de imagen deben ser detalladas para un diseñador o para Midjourney.
-- Lenguaje: español colombiano, cálido, directo. Nada corporativo.
+Genera exactamente ${slideCount + 2} slides: 1 hook + ${slideCount} contenido + 1 CTA.
+
+REGLAS DE COPY — MUY IMPORTANTES:
+- Hook: máx 8 palabras. Una sola idea. Que pare el scroll.
+- Título de cada slide: máx 5 palabras. Concreto y humano.
+- Mensaje de cada slide: máx 2 frases cortas. Máx 18 palabras en total. Una idea por slide, bien dicha.
+- CTA: máx 10 palabras. Botón: máx 3 palabras.
+- Sin párrafos. Sin listas. Sin explicaciones. Cada slide es un golpe limpio.
+- Nada de palabras como "peligro", "riesgo", "adicción", "amenaza". El tono es positivo y aspiracional.
+- Las descripciones de imagen deben ser visuales, cálidas y específicas — para un diseñador o Midjourney.
 
 Responde ÚNICAMENTE con este JSON (sin texto adicional, sin markdown):
 {
@@ -535,13 +540,13 @@ Responde ÚNICAMENTE con este JSON (sin texto adicional, sin markdown):
     {
       "tipo": "contenido",
       "titulo": "título corto del slide",
-      "mensaje": "copy del slide (2-4 frases)",
+      "mensaje": "máx 2 frases cortas",
       "imagen": "descripción detallada de la imagen/visual sugerida"
     },
     {
       "tipo": "cta",
-      "mensaje": "copy de cierre con llamado a la acción",
-      "boton": "texto del botón CTA",
+      "mensaje": "cierre breve con llamado a la acción",
+      "boton": "texto del botón",
       "imagen": "descripción detallada de la imagen/visual sugerida"
     }
   ]
@@ -557,7 +562,7 @@ Responde ÚNICAMENTE con este JSON (sin texto adicional, sin markdown):
           'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
+          model: 'claude-3-5-sonnet-20241022',
           max_tokens: 1500,
           messages: [{ role: 'user', content: prompt }]
         })
