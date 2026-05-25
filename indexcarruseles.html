@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kiper · Generador de Carruseles</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark: #043d2a;
+      --green-mid: #0c6b45;
+      --green-bright: #1aad6e;
+      --green-light: #d4f5e5;
+      --green-pale: #f0faf5;
+      --sand: #f7f5f0;
+      --ink: #1a1a18;
+      --ink-soft: #4a4a44;
+      --ink-muted: #8a8a80;
+      --line: #e4e2da;
+      --white: #ffffff;
+      --red: #d94f3a;
+      --amber: #d97a1a;
+      --radius: 10px;
+      --radius-lg: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--sand);
+      color: var(--ink);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--green-dark);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--green-bright);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px; color: white;
+    }
+    .logo-text {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px; color: white; letter-spacing: -0.3px;
+    }
+    .logo-sub {
+      font-size: 12px; color: rgba(255,255,255,0.45);
+      margin-left: auto;
+      font-weight: 300;
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 20px; }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 16px;
+    }
+
+    /* API KEY */
+    .api-row { display: flex; gap: 8px; }
+    .api-input {
+      flex: 1;
+      font-family: 'DM Sans', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--sand);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .api-input:focus { border-color: var(--green-bright); }
+    .api-input::placeholder { color: var(--ink-muted); }
+    .btn-icon {
+      width: 40px; height: 40px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--sand);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-icon:hover { background: var(--green-light); border-color: var(--green-bright); }
+    .api-note {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--ink-muted);
+      line-height: 1.5;
+    }
+    .api-note a { color: var(--green-mid); text-decoration: none; }
+    .api-note a:hover { text-decoration: underline; }
+
+    /* ANGLES */
+    .angles-list { display: flex; flex-direction: column; gap: 6px; }
+    .angle-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: none;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      width: 100%;
+    }
+    .angle-btn:hover { background: var(--green-pale); border-color: var(--green-bright); }
+    .angle-btn.active {
+      background: var(--green-light);
+      border-color: var(--green-mid);
+    }
+    .angle-num {
+      width: 24px; height: 24px; flex-shrink: 0;
+      border-radius: 6px;
+      background: var(--sand);
+      font-size: 11px; font-weight: 600;
+      color: var(--ink-muted);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .angle-btn.active .angle-num {
+      background: var(--green-mid);
+      color: white;
+    }
+    .angle-label { font-size: 13px; color: var(--ink); line-height: 1.3; }
+
+    /* CONTROLS */
+    .control-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .control-label { font-size: 13px; color: var(--ink-soft); }
+    .stepper { display: flex; align-items: center; gap: 8px; }
+    .step-btn {
+      width: 32px; height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--ink-soft);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+      line-height: 1;
+    }
+    .step-btn:hover { background: var(--green-light); border-color: var(--green-mid); color: var(--green-dark); }
+    .step-val { width: 24px; text-align: center; font-weight: 600; font-size: 15px; }
+
+    .btn-generate {
+      width: 100%;
+      padding: 14px;
+      background: var(--green-mid);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      letter-spacing: -0.2px;
+    }
+    .btn-generate:hover:not(:disabled) { background: var(--green-dark); transform: translateY(-1px); }
+    .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── MAIN OUTPUT ── */
+    .main { display: flex; flex-direction: column; gap: 16px; }
+
+    .empty-state {
+      background: var(--white);
+      border: 1px dashed var(--line);
+      border-radius: var(--radius-lg);
+      padding: 80px 40px;
+      text-align: center;
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.3; }
+    .empty-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink-soft); margin-bottom: 8px; }
+    .empty-desc { font-size: 14px; color: var(--ink-muted); }
+
+    .loading-state {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 60px 40px;
+      text-align: center;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--green-light);
+      border-top-color: var(--green-mid);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: var(--ink-muted); }
+
+    /* CAROUSEL HEADER */
+    .carousel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+    }
+    .carousel-meta { display: flex; flex-direction: column; gap: 2px; }
+    .carousel-tag {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--green-mid);
+    }
+    .carousel-angle { font-size: 15px; font-weight: 500; color: var(--ink); }
+    .btn-export {
+      padding: 8px 16px;
+      background: none;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-export:hover { background: var(--sand); border-color: var(--ink-muted); }
+
+    /* SLIDE CARDS */
+    .slide-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      animation: fadeUp 0.3s ease both;
+    }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: none; } }
+    .slide-card:nth-child(2) { animation-delay: 0.05s; }
+    .slide-card:nth-child(3) { animation-delay: 0.1s; }
+    .slide-card:nth-child(4) { animation-delay: 0.15s; }
+    .slide-card:nth-child(5) { animation-delay: 0.2s; }
+    .slide-card:nth-child(6) { animation-delay: 0.25s; }
+    .slide-card:nth-child(7) { animation-delay: 0.3s; }
+
+    .slide-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--sand);
+    }
+    .slide-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .pill-hook { background: #fde8e5; color: #8b2012; }
+    .pill-content { background: #deeeff; color: #0c3f7a; }
+    .pill-cta { background: var(--green-light); color: var(--green-dark); }
+    .pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; }
+
+    .btn-copy {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px; font-weight: 500;
+      padding: 5px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-copy:hover { background: var(--green-light); border-color: var(--green-mid); color: var(--green-dark); }
+    .btn-copy.copied { background: var(--green-light); border-color: var(--green-mid); color: var(--green-dark); }
+
+    .slide-body { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .field-block { display: flex; flex-direction: column; gap: 6px; }
+    .field-name {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+    .field-val {
+      font-size: 14px; color: var(--ink);
+      line-height: 1.55;
+      background: var(--sand);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      flex: 1;
+    }
+    .field-val.img-desc {
+      border: 1px dashed var(--line);
+      background: var(--white);
+      color: var(--ink-soft);
+      font-size: 13px;
+      font-style: italic;
+    }
+    .field-val.cta-btn {
+      background: var(--green-mid);
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    /* ERROR */
+    .error-card {
+      background: #fff5f4;
+      border: 1px solid #f5c6c0;
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+    }
+    .error-title { font-weight: 600; color: var(--red); margin-bottom: 8px; font-size: 14px; }
+    .error-body { font-size: 13px; color: #6b2a1f; line-height: 1.6; font-family: monospace; background: #fee8e5; padding: 10px; border-radius: 6px; word-break: break-all; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .container { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .slide-body { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">K</div>
+  <span class="logo-text">Kiper</span>
+  <span class="logo-sub">Generador de carruseles de pauta</span>
+</header>
+
+<div class="container">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- API KEY -->
+    <div class="card">
+      <p class="card-title">API Key de Anthropic</p>
+      <div class="api-row">
+        <input type="password" class="api-input" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off" />
+        <button class="btn-icon" id="toggleKey" title="Mostrar/ocultar">👁</button>
+      </div>
+      <p class="api-note">
+        Obtén tu key en <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a>.<br>
+        Se guarda solo en tu navegador (localStorage).
+      </p>
+    </div>
+
+    <!-- ÁNGULOS -->
+    <div class="card">
+      <p class="card-title">Ángulo de venta</p>
+      <div class="angles-list" id="anglesList"></div>
+    </div>
+
+    <!-- CONTROLES -->
+    <div class="card">
+      <p class="card-title">Configuración</p>
+      <div class="control-row">
+        <span class="control-label">Slides de contenido</span>
+        <div class="stepper">
+          <button class="step-btn" id="stepDown">−</button>
+          <span class="step-val" id="stepVal">3</span>
+          <button class="step-btn" id="stepUp">+</button>
+        </div>
+      </div>
+      <button class="btn-generate" id="genBtn" disabled>
+        <span id="genIcon">✦</span>
+        <span id="genText">Selecciona un ángulo</span>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- OUTPUT -->
+  <main class="main" id="output">
+    <div class="empty-state">
+      <div class="empty-icon">◎</div>
+      <div class="empty-title">Listo para generar</div>
+      <div class="empty-desc">Agrega tu API key, elige un ángulo<br>y presiona Generar.</div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  /* ── STATE ── */
+  const ANGLES = [
+    {n:1, t:"Papá que decide diferente"},
+    {n:2, t:"No quiere perderse la niñez"},
+    {n:3, t:"No todo avance es progreso"},
+    {n:4, t:"Conexión sin adelantar etapas"},
+    {n:5, t:"El celular ya no es la única opción"},
+    {n:6, t:"Profesional y papá presente"},
+    {n:7, t:"Minimalismo en comunicación"},
+    {n:8, t:"Orden en el uso de celulares"},
+    {n:9, t:"Niño incomunicado no es lo adecuado"},
+    {n:10, t:"Un paso adelante"},
+    {n:11, t:"Demo producto en uso real"},
+    {n:12, t:"Cuidar y escucharlos tú mismo"},
+    {n:13, t:"Presente sin sofocar"},
+  ];
+
+  let selAngle = null;
+  let slideCount = 3;
+  let currentSlides = [];
+
+  /* ── API KEY ── */
+  const apiInput = document.getElementById('apiKey');
+  const saved = localStorage.getItem('kiper_api_key');
+  if (saved) apiInput.value = saved;
+  apiInput.addEventListener('input', () => localStorage.setItem('kiper_api_key', apiInput.value.trim()));
+
+  document.getElementById('toggleKey').addEventListener('click', () => {
+    apiInput.type = apiInput.type === 'password' ? 'text' : 'password';
+  });
+
+  /* ── ANGLES ── */
+  const list = document.getElementById('anglesList');
+  ANGLES.forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = 'angle-btn';
+    btn.innerHTML = `<span class="angle-num">${a.n}</span><span class="angle-label">${a.t}</span>`;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.angle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selAngle = a;
+      updateGenBtn();
+    });
+    list.appendChild(btn);
+  });
+
+  /* ── STEPPER ── */
+  document.getElementById('stepDown').addEventListener('click', () => {
+    if (slideCount > 2) { slideCount--; document.getElementById('stepVal').textContent = slideCount; }
+  });
+  document.getElementById('stepUp').addEventListener('click', () => {
+    if (slideCount < 6) { slideCount++; document.getElementById('stepVal').textContent = slideCount; }
+  });
+
+  /* ── GEN BUTTON STATE ── */
+  function updateGenBtn() {
+    const btn = document.getElementById('genBtn');
+    const txt = document.getElementById('genText');
+    const key = apiInput.value.trim();
+    if (!key) { txt.textContent = 'Falta la API key'; btn.disabled = true; return; }
+    if (!selAngle) { txt.textContent = 'Selecciona un ángulo'; btn.disabled = true; return; }
+    txt.textContent = 'Generar carrusel';
+    btn.disabled = false;
+  }
+  apiInput.addEventListener('input', updateGenBtn);
+
+  /* ── GENERATE ── */
+  document.getElementById('genBtn').addEventListener('click', generate);
+
+  async function generate() {
+    const key = apiInput.value.trim();
+    if (!key || !selAngle) return;
+
+    const btn = document.getElementById('genBtn');
+    const txt = document.getElementById('genText');
+    const out = document.getElementById('output');
+
+    btn.disabled = true;
+    txt.textContent = 'Generando...';
+    out.innerHTML = `<div class="loading-state"><div class="spinner"></div><p class="loading-text">Escribiendo el carrusel con IA...</p></div>`;
+
+    const prompt = `Eres copywriter experto en publicidad digital para redes sociales en Colombia.
+
+PRODUCTO: Kiper — reloj inteligente para niños. Es la alternativa al smartphone para niños de 6 a 12 años que necesitan estar conectados con sus papás.
+FUNCIONES: llamadas a hasta 15 contactos aprobados (sin números externos), mensajes de voz, GPS en tiempo real, cámara con foto remota (el papá manda solicitud y el niño responde con foto desde el reloj), música, videos, grabadora, calculadora, alarmas, 2 juegos educativos (matemáticas e inglés), control parental desde WhatsApp. NO tiene: redes sociales, apps, navegador, nada que distraiga.
+ÁNGULO DE VENTA: Ángulo ${selAngle.n} — "${selAngle.t}"
+AUDIENCIA: Padres con hijos 6-12 años, clase media y media-alta, Colombia. Padres modernos, con empleo, que usan WhatsApp y redes sociales.
+
+Genera exactamente ${slideCount + 2} slides: 1 hook + ${slideCount} slides de contenido + 1 CTA final.
+
+REGLAS:
+- El hook debe impactar emocionalmente en máximo 12 palabras. Puede ser pregunta, afirmación provocadora o verdad incómoda.
+- Los slides de contenido deben conectar profundo con el ángulo y mostrar el beneficio de Kiper.
+- El CTA debe ser claro, urgente y humano. Nada genérico.
+- Las descripciones de imagen deben ser detalladas para un diseñador o para Midjourney.
+- Lenguaje: español colombiano, cálido, directo. Nada corporativo.
+
+Responde ÚNICAMENTE con este JSON (sin texto adicional, sin markdown):
+{
+  "angulo": "${selAngle.t}",
+  "slides": [
+    {
+      "tipo": "hook",
+      "mensaje": "texto del hook",
+      "imagen": "descripción detallada de la imagen/visual sugerida"
+    },
+    {
+      "tipo": "contenido",
+      "titulo": "título corto del slide",
+      "mensaje": "copy del slide (2-4 frases)",
+      "imagen": "descripción detallada de la imagen/visual sugerida"
+    },
+    {
+      "tipo": "cta",
+      "mensaje": "copy de cierre con llamado a la acción",
+      "boton": "texto del botón CTA",
+      "imagen": "descripción detallada de la imagen/visual sugerida"
+    }
+  ]
+}`;
+
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 1500,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      if (!resp.ok) {
+        const errBody = await resp.text();
+        throw new Error(`HTTP ${resp.status}: ${errBody.slice(0, 400)}`);
+      }
+
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+
+      const raw = (data.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('No se encontró JSON en la respuesta.\n\nRespuesta: ' + raw.slice(0, 300));
+
+      const parsed = JSON.parse(match[0]);
+      if (!parsed.slides || !Array.isArray(parsed.slides)) throw new Error('Estructura inesperada en el JSON.');
+
+      currentSlides = parsed.slides;
+      renderCarousel(parsed.slides);
+
+    } catch (err) {
+      out.innerHTML = `<div class="error-card">
+        <div class="error-title">Error al generar</div>
+        <div class="error-body">${err.message}</div>
+      </div>`;
+    }
+
+    btn.disabled = false;
+    txt.textContent = 'Generar otro';
+  }
+
+  /* ── RENDER ── */
+  function renderCarousel(slides) {
+    const out = document.getElementById('output');
+    let html = `
+      <div class="carousel-header">
+        <div class="carousel-meta">
+          <span class="carousel-tag">Carrusel generado · ${slides.length} slides</span>
+          <span class="carousel-angle">Ángulo ${selAngle.n}: ${selAngle.t}</span>
+        </div>
+        <button class="btn-export" onclick="exportAll()">⬇ Exportar todo</button>
+      </div>`;
+
+    slides.forEach((s, i) => {
+      const isHook = s.tipo === 'hook';
+      const isCta  = s.tipo === 'cta';
+      const pillClass = isHook ? 'pill-hook' : isCta ? 'pill-cta' : 'pill-content';
+      const pillLabel = isHook ? `Slide 1 · Hook` : isCta ? `Slide ${i+1} · CTA` : `Slide ${i+1} · Contenido`;
+
+      let body = '';
+      if (isHook) {
+        body = `
+          <div class="field-block">
+            <span class="field-name">Mensaje</span>
+            <div class="field-val">${s.mensaje || ''}</div>
+          </div>
+          <div class="field-block">
+            <span class="field-name">🖼 Imagen sugerida</span>
+            <div class="field-val img-desc">${s.imagen || ''}</div>
+          </div>`;
+      } else if (isCta) {
+        body = `
+          <div class="field-block">
+            <span class="field-name">Mensaje</span>
+            <div class="field-val">${s.mensaje || ''}</div>
+            <div class="field-val cta-btn">${s.boton || ''}</div>
+          </div>
+          <div class="field-block">
+            <span class="field-name">🖼 Imagen sugerida</span>
+            <div class="field-val img-desc">${s.imagen || ''}</div>
+          </div>`;
+      } else {
+        body = `
+          <div class="field-block">
+            ${s.titulo ? `<span class="field-name">Título</span><div class="field-val" style="font-weight:600">${s.titulo}</div>` : ''}
+            <span class="field-name">Mensaje</span>
+            <div class="field-val">${s.mensaje || ''}</div>
+          </div>
+          <div class="field-block">
+            <span class="field-name">🖼 Imagen sugerida</span>
+            <div class="field-val img-desc">${s.imagen || ''}</div>
+          </div>`;
+      }
+
+      html += `
+        <div class="slide-card" style="animation-delay:${i * 0.06}s">
+          <div class="slide-top">
+            <span class="slide-pill ${pillClass}">
+              <span class="pill-dot"></span>${pillLabel}
+            </span>
+            <button class="btn-copy" id="copy-${i}" onclick="copySlide(${i})">Copiar</button>
+          </div>
+          <div class="slide-body">${body}</div>
+        </div>`;
+    });
+
+    out.innerHTML = html;
+  }
+
+  /* ── COPY ── */
+  function copySlide(i) {
+    const s = currentSlides[i];
+    let text = '';
+    if (s.tipo === 'hook')
+      text = `HOOK:\n${s.mensaje}\n\nIMAGEN SUGERIDA: ${s.imagen}`;
+    else if (s.tipo === 'cta')
+      text = `CTA:\n${s.mensaje}\nBotón: ${s.boton}\n\nIMAGEN SUGERIDA: ${s.imagen}`;
+    else
+      text = `${s.titulo ? 'TÍTULO: ' + s.titulo + '\n' : ''}MENSAJE:\n${s.mensaje}\n\nIMAGEN SUGERIDA: ${s.imagen}`;
+
+    navigator.clipboard.writeText(text).catch(() => {});
+    const btn = document.getElementById(`copy-${i}`);
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  }
+
+  function exportAll() {
+    let text = `CARRUSEL KIPER — Ángulo ${selAngle.n}: ${selAngle.t}\n${'─'.repeat(50)}\n\n`;
+    currentSlides.forEach((s, i) => {
+      text += `SLIDE ${i+1} (${s.tipo.toUpperCase()})\n`;
+      if (s.tipo === 'hook')
+        text += `Mensaje: ${s.mensaje}\nImagen: ${s.imagen}\n\n`;
+      else if (s.tipo === 'cta')
+        text += `Mensaje: ${s.mensaje}\nBotón: ${s.boton}\nImagen: ${s.imagen}\n\n`;
+      else
+        text += `${s.titulo ? 'Título: ' + s.titulo + '\n' : ''}Mensaje: ${s.mensaje}\nImagen: ${s.imagen}\n\n`;
+    });
+    navigator.clipboard.writeText(text).catch(() => {});
+    const btn = document.querySelector('.btn-export');
+    btn.textContent = '✓ Copiado al portapapeles';
+    setTimeout(() => { btn.textContent = '⬇ Exportar todo'; }, 2500);
+  }
+</script>
+</body>
+</html>
